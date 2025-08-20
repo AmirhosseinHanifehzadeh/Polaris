@@ -1,0 +1,670 @@
+openapi: 3.0.3
+info:
+  title: Measurements API
+  description: |
+    API for managing network measurements including signal strength, network performance, and location data.
+    
+    This API provides endpoints for:
+    - Creating individual measurements
+    - Bulk creating multiple measurements
+    - Retrieving measurements by ID
+    - Listing measurements with filtering and pagination
+    - Deleting measurements
+    
+    ## Technologies Supported
+    - LTE (Long Term Evolution)
+    - GSM (Global System for Mobile Communications)
+    - UMTS (Universal Mobile Telecommunications System)
+    - 5G (Fifth Generation)
+    
+    ## Measurement Types
+    - Signal strength measurements (RSRP, RSRQ, RSCP, etc.)
+    - Network performance metrics (download/upload rates, ping times)
+    - Location data (GPS coordinates)
+    - Network identification (PLMN, LAC, TAC, Cell ID)
+    
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api/measurements
+    description: Development server
+  - url: https://api.example.com/api/measurements
+    description: Production server
+
+paths:
+  /:
+    get:
+      summary: List measurements
+      description: |
+        Retrieve a paginated list of measurements with optional filtering.
+        
+        Supports filtering by:
+        - Technology (LTE, GSM, UMTS, 5G)
+        - Date range (start_date and end_date)
+        
+        Supports pagination with limit and offset parameters.
+      operationId: listMeasurements
+      tags:
+        - Measurements
+      parameters:
+        - name: technology
+          in: query
+          description: Filter by network technology
+          required: false
+          schema:
+            type: string
+            enum: [LTE, GSM, UMTS, 5G]
+            example: "LTE"
+        - name: start_date
+          in: query
+          description: Filter measurements from this date (ISO 8601 format)
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: "2024-01-01T00:00:00Z"
+        - name: end_date
+          in: query
+          description: Filter measurements until this date (ISO 8601 format)
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: "2024-12-31T23:59:59Z"
+        - name: limit
+          in: query
+          description: Number of measurements to return (max 1000)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+            example: 50
+        - name: offset
+          in: query
+          description: Number of measurements to skip for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeasurementListResponse'
+              example:
+                count: 150
+                results:
+                  - id: 1
+                    timestamp: "2024-01-15T10:30:00Z"
+                    latitude: 40.7128
+                    longitude: -74.0060
+                    technology: "LTE"
+                    plmn_id: "310260"
+                    lac: 12345
+                    rac: 1
+                    tac: 67890
+                    cell_id: 123456789
+                    frequency_band: "B2"
+                    arfcn: 1875
+                    rsrp: -85.5
+                    rsrq: -12.3
+                    rscp: null
+                    ec_no: null
+                    rxlev: null
+                    download_rate: 45.2
+                    upload_rate: 12.8
+                    ping_response_time: 25.5
+                    dns_response_time: 15.2
+                    web_response_time: 120.5
+                    sms_delivery_time: 2.1
+                    created_at: "2024-01-15T10:30:00Z"
+                    updated_at: "2024-01-15T10:30:00Z"
+        '400':
+          description: Bad request - Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      summary: Create a single measurement
+      description: |
+        Create a new measurement record with network and performance data.
+        
+        Required fields:
+        - timestamp: When the measurement was taken
+        - latitude: GPS latitude coordinate
+        - longitude: GPS longitude coordinate
+        - technology: Network technology (LTE, GSM, UMTS, 5G)
+        
+        All other fields are optional and depend on the technology type.
+      operationId: createMeasurement
+      tags:
+        - Measurements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMeasurementRequest'
+            example:
+              timestamp: "2024-01-15T10:30:00Z"
+              latitude: 40.7128
+              longitude: -74.0060
+              technology: "LTE"
+              plmn_id: "310260"
+              lac: 12345
+              rac: 1
+              tac: 67890
+              cell_id: 123456789
+              frequency_band: "B2"
+              arfcn: 1875
+              rsrp: -85.5
+              rsrq: -12.3
+              download_rate: 45.2
+              upload_rate: 12.8
+              ping_response_time: 25.5
+              dns_response_time: 15.2
+              web_response_time: 120.5
+              sms_delivery_time: 2.1
+      responses:
+        '201':
+          description: Measurement created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+        '400':
+          description: Bad request - Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bulk_create/:
+    post:
+      summary: Create multiple measurements in bulk
+      description: |
+        Create multiple measurements in a single request for better performance.
+        
+        This endpoint is optimized for bulk operations and uses database transactions
+        to ensure data consistency. If any measurement fails to create, the entire
+        operation is rolled back.
+      operationId: bulkCreateMeasurements
+      tags:
+        - Measurements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkCreateMeasurementRequest'
+            example:
+              measurements:
+                - timestamp: "2024-01-15T10:30:00Z"
+                  latitude: 40.7128
+                  longitude: -74.0060
+                  technology: "LTE"
+                  rsrp: -85.5
+                  rsrq: -12.3
+                  download_rate: 45.2
+                  upload_rate: 12.8
+                - timestamp: "2024-01-15T10:31:00Z"
+                  latitude: 40.7129
+                  longitude: -74.0061
+                  technology: "LTE"
+                  rsrp: -87.2
+                  rsrq: -13.1
+                  download_rate: 42.1
+                  upload_rate: 11.5
+      responses:
+        '201':
+          description: Measurements created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCreateMeasurementResponse'
+        '400':
+          description: Bad request - Invalid data or bulk create error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{id}/:
+    get:
+      summary: Get a measurement by ID
+      description: Retrieve a specific measurement by its unique identifier.
+      operationId: getMeasurement
+      tags:
+        - Measurements
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the measurement
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      responses:
+        '200':
+          description: Measurement found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+        '404':
+          description: Measurement not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      summary: Delete a measurement
+      description: |
+        Delete a specific measurement by its unique identifier.
+        
+        This operation is irreversible. Once deleted, the measurement cannot be recovered.
+      operationId: deleteMeasurement
+      tags:
+        - Measurements
+      parameters:
+        - name: id
+          in: path
+          description: Unique identifier of the measurement to delete
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      responses:
+        '204':
+          description: Measurement deleted successfully
+        '404':
+          description: Measurement not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Measurement:
+      type: object
+      description: A network measurement record
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the measurement
+          example: 1
+        timestamp:
+          type: string
+          format: date-time
+          description: When the measurement was taken
+          example: "2024-01-15T10:30:00Z"
+        latitude:
+          type: number
+          format: float
+          description: GPS latitude coordinate
+          minimum: -90
+          maximum: 90
+          example: 40.7128
+        longitude:
+          type: number
+          format: float
+          description: GPS longitude coordinate
+          minimum: -180
+          maximum: 180
+          example: -74.0060
+        technology:
+          type: string
+          description: Network technology type
+          enum: [LTE, GSM, UMTS, 5G]
+          example: "LTE"
+        plmn_id:
+          type: string
+          description: Public Land Mobile Network identifier
+          maxLength: 10
+          example: "310260"
+        lac:
+          type: integer
+          description: Location Area Code
+          example: 12345
+        rac:
+          type: integer
+          description: Routing Area Code
+          example: 1
+        tac:
+          type: integer
+          description: Tracking Area Code
+          example: 67890
+        cell_id:
+          type: integer
+          description: Cell identifier
+          example: 123456789
+        frequency_band:
+          type: string
+          description: Frequency band identifier
+          maxLength: 20
+          example: "B2"
+        arfcn:
+          type: integer
+          description: Absolute Radio Frequency Channel Number
+          example: 1875
+        rsrp:
+          type: number
+          format: float
+          description: Reference Signal Received Power in dBm
+          example: -85.5
+        rsrq:
+          type: number
+          format: float
+          description: Reference Signal Received Quality in dB
+          example: -12.3
+        rscp:
+          type: number
+          format: float
+          description: Received Signal Code Power in dBm
+          example: -75.2
+        ec_no:
+          type: number
+          format: float
+          description: Ec/N0 ratio in dB
+          example: -8.5
+        rxlev:
+          type: number
+          format: float
+          description: Received signal level in dBm
+          example: -65.3
+        download_rate:
+          type: number
+          format: float
+          description: Download speed in Mbps
+          example: 45.2
+        upload_rate:
+          type: number
+          format: float
+          description: Upload speed in Mbps
+          example: 12.8
+        ping_response_time:
+          type: number
+          format: float
+          description: Ping response time in milliseconds
+          example: 25.5
+        dns_response_time:
+          type: number
+          format: float
+          description: DNS resolution time in milliseconds
+          example: 15.2
+        web_response_time:
+          type: number
+          format: float
+          description: Web page load time in milliseconds
+          example: 120.5
+        sms_delivery_time:
+          type: number
+          format: float
+          description: SMS delivery time in seconds
+          example: 2.1
+        created_at:
+          type: string
+          format: date-time
+          description: When the record was created
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: When the record was last updated
+          example: "2024-01-15T10:30:00Z"
+      required:
+        - id
+        - timestamp
+        - latitude
+        - longitude
+        - technology
+        - created_at
+        - updated_at
+
+    CreateMeasurementRequest:
+      type: object
+      description: Request body for creating a new measurement
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the measurement was taken
+          example: "2024-01-15T10:30:00Z"
+        latitude:
+          type: number
+          format: float
+          description: GPS latitude coordinate
+          minimum: -90
+          maximum: 90
+          example: 40.7128
+        longitude:
+          type: number
+          format: float
+          description: GPS longitude coordinate
+          minimum: -180
+          maximum: 180
+          example: -74.0060
+        technology:
+          type: string
+          description: Network technology type
+          enum: [LTE, GSM, UMTS, 5G]
+          example: "LTE"
+        plmn_id:
+          type: string
+          description: Public Land Mobile Network identifier
+          maxLength: 10
+          example: "310260"
+        lac:
+          type: integer
+          description: Location Area Code
+          example: 12345
+        rac:
+          type: integer
+          description: Routing Area Code
+          example: 1
+        tac:
+          type: integer
+          description: Tracking Area Code
+          example: 67890
+        cell_id:
+          type: integer
+          description: Cell identifier
+          example: 123456789
+        frequency_band:
+          type: string
+          description: Frequency band identifier
+          maxLength: 20
+          example: "B2"
+        arfcn:
+          type: integer
+          description: Absolute Radio Frequency Channel Number
+          example: 1875
+        rsrp:
+          type: number
+          format: float
+          description: Reference Signal Received Power in dBm
+          example: -85.5
+        rsrq:
+          type: number
+          format: float
+          description: Reference Signal Received Quality in dB
+          example: -12.3
+        rscp:
+          type: number
+          format: float
+          description: Received Signal Code Power in dBm
+          example: -75.2
+        ec_no:
+          type: number
+          format: float
+          description: Ec/N0 ratio in dB
+          example: -8.5
+        rxlev:
+          type: number
+          format: float
+          description: Received signal level in dBm
+          example: -65.3
+        download_rate:
+          type: number
+          format: float
+          description: Download speed in Mbps
+          example: 45.2
+        upload_rate:
+          type: number
+          format: float
+          description: Upload speed in Mbps
+          example: 12.8
+        ping_response_time:
+          type: number
+          format: float
+          description: Ping response time in milliseconds
+          example: 25.5
+        dns_response_time:
+          type: number
+          format: float
+          description: DNS resolution time in milliseconds
+          example: 15.2
+        web_response_time:
+          type: number
+          format: float
+          description: Web page load time in milliseconds
+          example: 120.5
+        sms_delivery_time:
+          type: number
+          format: float
+          description: SMS delivery time in seconds
+          example: 2.1
+      required:
+        - timestamp
+        - latitude
+        - longitude
+        - technology
+
+    MeasurementListResponse:
+      type: object
+      description: Response for listing measurements with pagination
+      properties:
+        count:
+          type: integer
+          description: Total number of measurements matching the filters
+          example: 150
+        results:
+          type: array
+          description: List of measurements
+          items:
+            $ref: '#/components/schemas/Measurement'
+      required:
+        - count
+        - results
+
+    BulkCreateMeasurementRequest:
+      type: object
+      description: Request body for bulk creating measurements
+      properties:
+        measurements:
+          type: array
+          description: List of measurements to create
+          items:
+            $ref: '#/components/schemas/CreateMeasurementRequest'
+          minItems: 1
+          maxItems: 1000
+      required:
+        - measurements
+
+    BulkCreateMeasurementResponse:
+      type: object
+      description: Response for bulk creating measurements
+      properties:
+        created_count:
+          type: integer
+          description: Number of measurements successfully created
+          example: 5
+        results:
+          type: array
+          description: List of created measurements
+          items:
+            $ref: '#/components/schemas/Measurement'
+      required:
+        - created_count
+        - results
+
+    ErrorResponse:
+      type: object
+      description: Standard error response
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Measurement not found"
+        detail:
+          type: string
+          description: Detailed error information
+          example: "The requested measurement with ID 123 does not exist"
+        code:
+          type: string
+          description: Error code
+          example: "MEASUREMENT_NOT_FOUND"
+      required:
+        - error
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Measurements
+    description: Operations for managing network measurements 
