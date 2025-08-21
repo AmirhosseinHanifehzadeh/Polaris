@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Parvin_Project"
+rootProject.name = "Porteghal"
 include(":app")
  

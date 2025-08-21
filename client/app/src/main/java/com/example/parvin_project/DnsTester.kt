@@ -1,5 +1,5 @@
 // DnsTester.kt
-package com.example.parvin_project
+package com.example.porteghal
 
 import android.content.Context
 import android.net.ConnectivityManager

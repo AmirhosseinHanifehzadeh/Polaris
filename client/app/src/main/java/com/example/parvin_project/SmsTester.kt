@@ -1,5 +1,5 @@
 // SmsTester.kt
-package com.example.parvin_project
+package com.example.porteghal
 
 import android.app.Activity
 import android.app.PendingIntent

@@ -1,5 +1,5 @@
 // ForegroundRecordingService.kt
-package com.example.parvin_project
+package com.example.porteghal
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.porteghal.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -270,7 +271,7 @@ class ForegroundRecordingService : LifecycleService() {
         handler.post(updateRunnable)
         Log.d("ForegroundService", "Recording started.")
         // Update notification to indicate active background recording
-        updateNotification("⚠ Big Brother Broadcast: Connection traced. Coordinates acquired. You are exposed.")
+        updateNotification("⚠ Porteghal is tracking your data")
     }
 
     private fun stopRecording() {
@@ -337,7 +338,6 @@ class ForegroundRecordingService : LifecycleService() {
                 return@launch
             }
 
-            val driveName = "MobileDrive_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}"
             val signals = recordedDataList.mapNotNull { dataMap ->
                 try {
                     val locationData = dataMap["location"] as? LocationData

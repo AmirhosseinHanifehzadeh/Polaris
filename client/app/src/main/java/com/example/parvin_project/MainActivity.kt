@@ -1,5 +1,5 @@
 // MainActivity.kt
-package com.example.parvin_project
+package com.example.porteghal
 
 import android.Manifest
 import android.content.BroadcastReceiver
@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.transition.TransitionManager
+import com.example.porteghal.R
 
 
 class MainActivity : AppCompatActivity() {
