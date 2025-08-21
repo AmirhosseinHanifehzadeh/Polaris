@@ -3,18 +3,13 @@ from typing import List, Dict
 from django.db import transaction
 from .models import Measurement
 from . import interfaces
-from apps.accounts import interfaces as accounts_interfaces
-from libs.redis_client import interfaces as cache_interfaces
 
 logger = logging.getLogger(__name__)
 
 
 class MeasurementService(interfaces.AbstractMeasurementService):
-    def __init__(
-            self,
-            claim: accounts_interfaces.Session,
-    ):
-        self.claim = claim
+    def __init__(self):
+        pass
 
     def create_measurement(self, request: interfaces.CreateMeasurementReq) -> interfaces.MeasurementDTO:
         logger.info(f"Creating measurement: {request}")

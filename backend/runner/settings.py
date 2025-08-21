@@ -142,18 +142,20 @@ LOGGING = {
 import pymysql
 pymysql.install_as_MySQLdb()
 
+# Database configuration
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DATABASE', 'polaris'),
-        'USER': 'root',
-        'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD', ''),
+        'NAME': os.getenv('MYSQL_DATABASE', 'polaris_db'),
+        'USER': os.getenv('MYSQL_USER', 'root'),
+        'PASSWORD': os.getenv('MYSQL_ROOT_PASSWORD', 'password'),
         'HOST': os.getenv('MYSQL_HOST', 'db'),
         'PORT': os.getenv('MYSQL_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
+        },
     }
 }
 

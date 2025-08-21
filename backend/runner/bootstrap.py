@@ -15,7 +15,7 @@ class Bootstrapper:
         return cls.instance
 
     def __init__(self, **kwargs) -> None:
-        self._measurements_service = MeasurementService(claim=None)
+        self._measurements_service = MeasurementService()
 
     def get_measurements_service(self) -> measurement_interfaces.AbstractMeasurementService:
         """Get measurements service instance"""

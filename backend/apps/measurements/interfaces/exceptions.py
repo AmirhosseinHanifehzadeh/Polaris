@@ -1,8 +1,8 @@
-from libs.exceptions import NotFoundRoot
+from libs.exceptions import NotFoundRoot, BadRequestRoot
 
 
 class MeasurementNotFound(NotFoundRoot):
     pass
 
-class BulkCreateError(BaseException):
+class BulkCreateError(BadRequestRoot):
     pass 

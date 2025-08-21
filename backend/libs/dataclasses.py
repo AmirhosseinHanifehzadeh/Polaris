@@ -4,6 +4,9 @@ from pydantic import BaseModel, StringConstraints, field_validator, Field, NonNe
 from pydantic_core import PydanticCustomError
 from pydantic_core.core_schema import FieldValidationInfo
 
+# Re-export BaseModel for convenience
+__all__ = ['BaseModel', 'BaseFilter', 'UUIDField', 'IPField', 'URLField', 'PositiveIntegerField', 'PasswordField', 'DateField', 'File']
+
 
 class BaseFilter(BaseModel):
     order_by: str = '-id'
