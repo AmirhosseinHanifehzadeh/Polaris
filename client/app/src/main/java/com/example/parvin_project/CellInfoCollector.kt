@@ -8,21 +8,11 @@ import android.telephony.*
 import android.util.Log
 import androidx.core.content.ContextCompat
 
-/**
- * Collects cellular network information using TelephonyManager.
- * @param context The application context.
- */
 class CellInfoCollector(private val context: Context) {
-
     private val telephonyManager: TelephonyManager =
         context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
-    /**
-     * Gathers current cellular network info and returns it as a CellInfoData object.
-     * @return A populated CellInfoData object, or one with an error message if data is unavailable.
-     */
     fun getCellInfoData(): CellInfoData {
-        // Essential permission check for location, which is needed for getCellInfo
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return CellInfoData(errorMessage = "Location permission not granted. Cell information requires it.")
         }
@@ -34,7 +24,6 @@ class CellInfoCollector(private val context: Context) {
                 return CellInfoData(errorMessage = "No cell information available.")
             }
 
-            // Find the first registered (serving) cell and parse it
             for (cellInfo in cellInfoList) {
                 if (cellInfo.isRegistered) {
                     return parseServingCellInfo(cellInfo)
@@ -51,21 +40,14 @@ class CellInfoCollector(private val context: Context) {
         }
     }
 
-    /**
-     * Parses a serving CellInfo object to extract details into our CellInfoData model.
-     */
     private fun parseServingCellInfo(cellInfo: CellInfo): CellInfoData {
         return when (cellInfo) {
             is CellInfoGsm -> parseGsm(cellInfo)
             is CellInfoWcdma -> parseWcdma(cellInfo)
             is CellInfoLte -> parseLte(cellInfo)
-            is CellInfoNr -> parseNr(cellInfo)
-            // Other types like CDMA and TDSCDMA are ignored as they are not on the requested list.
             else -> CellInfoData(technology = "Unknown", errorMessage = "Unsupported cell type: ${cellInfo::class.java.simpleName}")
         }
     }
-
-    // --- Parsers for each technology ---
 
     private fun parseGsm(cellInfo: CellInfoGsm): CellInfoData {
         val identity = cellInfo.cellIdentity
@@ -106,7 +88,6 @@ class CellInfoCollector(private val context: Context) {
             frequencyBand = band,
             frequencyHz = uarfcn?.let { getUtranDownlinkFrequency(it) },
             rscp = signal.dbm.takeIf { it != CellInfo.UNAVAILABLE },
-            ecNo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) signal.ecNo.takeIf { it != CellInfo.UNAVAILABLE } else null
         )
     }
 
@@ -127,35 +108,6 @@ class CellInfoCollector(private val context: Context) {
             frequencyHz = earfcn?.let { getLteDownlinkFrequency(it) },
             rsrp = signal.rsrp.takeIf { it != CellInfo.UNAVAILABLE },
             rsrq = signal.rsrq.takeIf { it != CellInfo.UNAVAILABLE }
-        )
-    }
-
-    private fun parseNr(cellInfo: CellInfoNr): CellInfoData {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            return CellInfoData(technology = "5G NR", errorMessage = "Detailed 5G info requires Android 10 (Q) or higher.")
-        }
-        val identity = cellInfo.cellIdentity as CellIdentityNr
-        val signal = cellInfo.cellSignalStrength as CellSignalStrengthNr
-
-        // Get NR-ARFCN
-        val nrarfcn = identity.nrarfcn.takeIf { it != CellInfo.UNAVAILABLE }
-
-        // Determine NR band using the helper
-        val nrBand = nrarfcn?.let { getNrBand(it) } ?: "Unknown NR"
-
-        // Calculate NR downlink frequency using the helper
-        val nrFrequencyHz = nrarfcn?.let { getNrDownlinkFrequency(it) }
-
-        return CellInfoData(
-            technology = "5G NR",
-            plmnId = getPlmnId(identity.mccString, identity.mncString),
-            tac = identity.tac.takeIf { it != CellInfo.UNAVAILABLE },
-            cellId = identity.nci.takeIf { it != CellInfo.UNAVAILABLE.toLong() },
-            nrarfcn = nrarfcn,
-            frequencyBand = nrBand, // Use the determined NR band
-            frequencyHz = nrFrequencyHz, // Use the calculated NR frequency
-            rsrp = signal.ssRsrp.takeIf { it != CellInfo.UNAVAILABLE },
-            rsrq = signal.ssRsrq.takeIf { it != CellInfo.UNAVAILABLE }
         )
     }
 

@@ -50,7 +50,7 @@ class ForegroundRecordingService : LifecycleService() {
     private var shouldCaptureDnsTest: Boolean = true
     private var shouldCaptureUploadRate: Boolean = true
 
-    private lateinit var apiService: PleiadesApiService
+    private lateinit var apiService: ApiService
 
     private lateinit var localBroadcastManager: LocalBroadcastManager
 
@@ -351,9 +351,10 @@ class ForegroundRecordingService : LifecycleService() {
                             val originalFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                             val date = originalFormat.parse(it)
                             val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
-                            isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC") // API expects Z for UTC
                             if (date != null) {
                                 isoFormat.format(date)
+                            }else {
+                                isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC") // API expects Z for UTC
                             }
                         } catch (e: Exception) {
                             Log.e("ForegroundService", "Error converting timestamp to ISO 8601: $it", e)
@@ -406,8 +407,7 @@ class ForegroundRecordingService : LifecycleService() {
                 }
             }
 
-            val driveData = DriveData(
-                drive = DriveBase(name = driveName),
+            val driveData = RequestBody(
                 signals = signals
             )
 
@@ -419,7 +419,7 @@ class ForegroundRecordingService : LifecycleService() {
 
 
             try {
-                val response = apiService.createDriveEntry(driveData)
+                val response = apiService.createAPI(driveData)
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         Log.d("ForegroundService", "Data successfully uploaded to API. Response code: ${response.code()}")

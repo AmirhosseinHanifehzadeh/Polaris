@@ -28,8 +28,6 @@ class MainActivity : AppCompatActivity() {
     private var isRecordingServiceRunning: Boolean = false // Track service state
     private lateinit var infoTextView: TextView
     private lateinit var toggleButton: Button
-    private lateinit var logoutButton: Button
-    private lateinit var copyButton: Button
     private lateinit var rootLayout: ViewGroup
     private lateinit var captureDownloadRateCheckBox: CheckBox
     private lateinit var capturePingTestCheckBox: CheckBox
@@ -78,12 +76,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // HIDE THE ACTION BAR (TITLE BAR)
-        supportActionBar?.hide() // ADDED THIS LINE
+//        supportActionBar?.hide() // ADDED THIS LINE
 
         // Initialize UI elements
         infoTextView = findViewById(R.id.infoTextView)
         toggleButton = findViewById(R.id.toggleButton)
-        copyButton = findViewById(R.id.copyButton)
         rootLayout = findViewById(R.id.rootLayout)
         captureDownloadRateCheckBox = findViewById(R.id.captureDownloadRateCheckBox)
         capturePingTestCheckBox = findViewById(R.id.capturePingTestCheckBox)
@@ -144,35 +141,20 @@ class MainActivity : AppCompatActivity() {
                     startRecordingService()
                     updateToggleButtonState(true)
                     TransitionManager.beginDelayedTransition(rootLayout)
-                    infoTextView.text = "Starting data collection service... Please wait for first live update."
-                    Toast.makeText(this, "Recording started. See persistent notification.", Toast.LENGTH_LONG).show() // New Toast
+                    infoTextView.text =
+                        "Starting data collection service... Please wait for first live update."
+                    Toast.makeText(
+                        this,
+                        "Recording started. See persistent notification.",
+                        Toast.LENGTH_LONG
+                    ).show() // New Toast
                 } else {
                     TransitionManager.beginDelayedTransition(rootLayout)
-                    infoTextView.text = "Requesting permissions... Please grant all required permissions to proceed."
+                    infoTextView.text =
+                        "Requesting permissions... Please grant all required permissions to proceed."
                     Log.w("MainActivity", "Permissions were requested. Waiting for user response.")
                 }
             }
-        }
-
-        // Set click listener for the copy button
-        copyButton.setOnClickListener {
-            copyTextToClipboard(infoTextView.text.toString())
-        }
-
-        logoutButton = findViewById(R.id.logoutButton)
-        logoutButton.setOnClickListener {
-            // 1) clear stored token
-            TokenManager.clearTokens()
-
-            // 2) send user back to LoginActivity, clearing the back‑stack
-            val intent = Intent(this, LoginActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            startActivity(intent)
-
-            stopRecordingService()
-            // 3) finish this activity so there’s no “back” possible
-            finish()
         }
     }
 
