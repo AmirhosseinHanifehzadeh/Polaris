@@ -6,9 +6,9 @@ from datetime import datetime
 class MeasurementDTO(dataclasses.BaseModel):
     id: int
     timestamp: datetime
-    latitude: float
-    longitude: float
-    technology: str
+    latitude: float | None = None
+    longitude: float | None = None
+    technology: str | None = None
     plmn_id: Optional[str] = None
     lac: Optional[int] = None
     rac: Optional[int] = None
@@ -33,9 +33,9 @@ class MeasurementDTO(dataclasses.BaseModel):
 
 class CreateMeasurementReq(dataclasses.BaseModel):
     timestamp: datetime
-    latitude: float
-    longitude: float
-    technology: str
+    latitude: float | None = None 
+    longitude: float | None = None 
+    technology: str | None = None 
     plmn_id: Optional[str] = None
     lac: Optional[int] = None
     rac: Optional[int] = None

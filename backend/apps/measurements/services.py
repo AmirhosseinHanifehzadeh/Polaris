@@ -100,6 +100,9 @@ class MeasurementService(interfaces.AbstractMeasurementService):
                 created_measurements = []
                 
                 for measurement_data in request.measurements:
+                    if measurement_data.latitude is None or measurement_data.longitude is None:
+                        continue
+                    
                     measurement = Measurement.objects.create(
                         timestamp=measurement_data.timestamp,
                         latitude=measurement_data.latitude,

@@ -5,7 +5,7 @@ class Measurement(models.Model):
     timestamp = models.DateTimeField()
     latitude = models.FloatField()
     longitude = models.FloatField()
-    technology = models.CharField(max_length=10)  # LTE, GSM, etc.
+    technology = models.CharField(max_length=10, blank=True, null=True)  # LTE, GSM, etc.
     plmn_id = models.CharField(max_length=10, blank=True, null=True)
     lac = models.IntegerField(blank=True, null=True)
     rac = models.IntegerField(blank=True, null=True)
