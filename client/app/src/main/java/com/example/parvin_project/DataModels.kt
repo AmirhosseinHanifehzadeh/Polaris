@@ -1,6 +1,6 @@
 // DataModels.kt
 package com.example.porteghal
-
+import com.google.gson.annotations.SerializedName
 /**
  * Data class to hold collected Location information.
  * @param latitude The latitude.
@@ -16,13 +16,16 @@ data class LocationData(
 data class CellInfoData(
     // Identity Parameters
     val technology: String? = null,
+    @SerializedName("plmn_id")
     val plmnId: String? = null,
     val lac: Int? = null,
     val tac: Int? = null,
     val rac: Int? = null, // Not available via public APIs
+    @SerializedName("cell_id")
     val cellId: Long? = null,
 
     // Frequency Parameters
+    @SerializedName("frequency_band")
     val frequencyBand: String? = null,
     val arfcn: Int? = null,
     val earfcn: Int? = null,
@@ -38,22 +41,23 @@ data class CellInfoData(
     val rxLev: Int? = null,
 
     // Status Message
+    @SerializedName("error_message")
     val errorMessage: String? = null
 )
 
 
 data class Signal(
-    val record_time: String?, // ISO 8601 format (e.g., "2024-06-14T12:00:00Z")
+    val timestamp: String?, // ISO 8601 format (e.g., "2024-06-14T12:00:00Z")
 
     val technology: String? = null,
-    val plmnId: String? = null,
+    val plmn_id: String? = null,
     val lac: Int? = null,
     val tac: Int? = null,
-    val rac: Int? = null, // Not available via public APIs
-    val cellId: Long? = null,
+    val rac: Int? = null,
+    val cell_id: Long? = null,
 
     // Frequency Parameters
-    val frequencyBand: String? = null,
+    val frequency_band: String? = null,
     val arfcn: Int? = null,
     val earfcn: Int? = null,
     val uarfcn: Int? = null,
@@ -69,8 +73,8 @@ data class Signal(
 
     val download_rate: Double?, // KB/s
     val upload_rate: Double?, // KB/s
-    val dns_lookup_rate: Double?, // ms
-    val ping: Double?, // ms
+    val dns_response_time: Double?, // ms
+    val ping_response_time: Double?, // ms
     val sms_delivery_time: Double?, // ms (was Int in OpenAPI, but your code generates Double for durationMs)
 
     val longitude: Double?,
@@ -78,5 +82,5 @@ data class Signal(
 )
 
 data class RequestBody(
-    val signals: List<Signal>
+    val measurements: List<Signal>
 )

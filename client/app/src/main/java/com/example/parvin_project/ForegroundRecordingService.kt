@@ -16,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.example.porteghal.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -338,7 +337,7 @@ class ForegroundRecordingService : LifecycleService() {
                 return@launch
             }
 
-            val signals = recordedDataList.mapNotNull { dataMap ->
+            val measurements = recordedDataList.mapNotNull { dataMap ->
                 try {
                     val locationData = dataMap["location"] as? LocationData
                     val cellInfoData = dataMap["cellInfo"] as? CellInfoData
@@ -371,16 +370,16 @@ class ForegroundRecordingService : LifecycleService() {
 
 
                     Signal(
-                        record_time = recordTime,
+                        timestamp = recordTime,
 
                         technology = cellInfoData?.technology,
-                        plmnId = cellInfoData?.plmnId,
+                        plmn_id = cellInfoData?.plmnId,
                         lac = cellInfoData?.lac,
                         rac = cellInfoData?.rac,
                         tac = cellInfoData?.tac,
-                        cellId = cellInfoData?.cellId,
+                        cell_id = cellInfoData?.cellId,
 
-                        frequencyBand = cellInfoData?.frequencyBand,
+                        frequency_band = cellInfoData?.frequencyBand,
                         arfcn = cellInfoData?.arfcn,
                         earfcn = cellInfoData?.earfcn,
                         uarfcn = cellInfoData?.uarfcn,
@@ -395,8 +394,8 @@ class ForegroundRecordingService : LifecycleService() {
 
                         download_rate = dataMap["downloadRateKbps"] as? Double,
                         upload_rate = dataMap["uploadRateKbps"] as? Double,
-                        dns_lookup_rate = dataMap["dnsLookupTimeMs"] as? Double,
-                        ping = dataMap["pingResultMs"] as? Double,
+                        dns_response_time = dataMap["dnsLookupTimeMs"] as? Double,
+                        ping_response_time = dataMap["pingResultMs"] as? Double,
                         sms_delivery_time = smsDeliveryTime, // Converted to Double?
                         longitude = locationData?.longitude,
                         latitude = locationData?.latitude
@@ -408,13 +407,13 @@ class ForegroundRecordingService : LifecycleService() {
             }
 
             val driveData = RequestBody(
-                signals = signals
+                measurements = measurements
             )
 
             // Send to API
             withContext(Dispatchers.Main) { // Temporarily switch to Main for Toast/UI update
                 Toast.makeText(this@ForegroundRecordingService, "Uploading data to server...", Toast.LENGTH_LONG).show()
-                Log.d("ForegroundService", "Attempting to upload ${signals.size} signals to /drive API.")
+                Log.d("ForegroundService", "Attempting to upload ${measurements.size} signals to /drive API.")
             }
 
 
@@ -423,15 +422,15 @@ class ForegroundRecordingService : LifecycleService() {
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         Log.d("ForegroundService", "Data successfully uploaded to API. Response code: ${response.code()}")
-                        val message = "Data uploaded successfully! ${signals.size} entries."
+                        val message = "Data uploaded successfully! ${measurements.size} entries."
                         Toast.makeText(this@ForegroundRecordingService, message, Toast.LENGTH_LONG).show()
                         val intent = Intent(ServiceConstants.ACTION_RECEIVE_FULL_LOGS) // Re-use for success message
-                        intent.putExtra(ServiceConstants.EXTRA_FULL_LOGS, "Upload successful. Total entries: ${signals.size}\n\n$message")
+                        intent.putExtra(ServiceConstants.EXTRA_FULL_LOGS, "Upload successful. Total entries: ${measurements.size}\n\n$message")
                         localBroadcastManager.sendBroadcast(intent)
                     } else {
                         val errorBody = response.errorBody()?.string()
                         Log.e("ForegroundService", "API upload failed. Code: ${response.code()}, Error: $errorBody")
-                        val message = "Upload failed: ${response.code()} ${response.message()}\nError: ${errorBody ?: "No error body"}"
+                        val message = "Upload failed: ${response.code()} ${response.message()}\nError: ${errorBody ?: "No error body"}\n ${driveData}"
                         Toast.makeText(this@ForegroundRecordingService, message, Toast.LENGTH_LONG).show()
                         val intent = Intent(ServiceConstants.ACTION_RECEIVE_FULL_LOGS) // Re-use for error message
                         intent.putExtra(ServiceConstants.EXTRA_FULL_LOGS, "Upload failed.\n\n$message")
