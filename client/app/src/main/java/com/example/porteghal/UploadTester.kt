@@ -9,8 +9,6 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.io.OutputStream
-import java.io.FileInputStream
-import java.io.File
 
 /**
  * Performs an HTTP file upload test and measures the upload rate.

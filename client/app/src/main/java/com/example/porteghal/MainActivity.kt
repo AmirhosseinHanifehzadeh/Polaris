@@ -21,7 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.transition.TransitionManager
-import com.example.porteghal.R
 
 
 class MainActivity : AppCompatActivity() {

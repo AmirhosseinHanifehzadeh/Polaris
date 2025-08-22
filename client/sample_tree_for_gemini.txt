@@ -7,14 +7,14 @@
 │       │   └── java
 │       │       └── com
 │       │           └── example
-│       │               └── parvin_project
+│       │               └── porteghal
 │       │                   └── ExampleInstrumentedTest.kt
 │       ├── main
 │       │   ├── AndroidManifest.xml
 │       │   ├── java
 │       │   │   └── com
 │       │   │       └── example
-│       │   │           └── parvin_project
+│       │   │           └── porteghal
 │       │   │               ├── MainActivity.kt
 │       │   │               └── ui
 │       │   │                   └── theme
@@ -54,7 +54,7 @@
 │           └── java
 │               └── com
 │                   └── example
-│                       └── parvin_project
+│                       └── porteghal
 │                           └── ExampleUnitTest.kt
 ├── build.gradle.kts
 ├── gradle
