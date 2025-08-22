@@ -369,37 +369,42 @@ class ForegroundRecordingService : LifecycleService() {
                     }
 
 
-                    Signal(
-                        timestamp = recordTime,
+                    if (locationData == null) {
+                        null
+                    }
+                    else {
+                        Signal(
+                            timestamp = recordTime,
 
-                        technology = cellInfoData?.technology,
-                        plmn_id = cellInfoData?.plmnId,
-                        lac = cellInfoData?.lac,
-                        rac = cellInfoData?.rac,
-                        tac = cellInfoData?.tac,
-                        cell_id = cellInfoData?.cellId,
+                            technology = cellInfoData?.technology,
+                            plmn_id = cellInfoData?.plmnId,
+                            lac = cellInfoData?.lac,
+                            rac = cellInfoData?.rac,
+                            tac = cellInfoData?.tac,
+                            cell_id = cellInfoData?.cellId,
 
-                        frequency_band = cellInfoData?.frequencyBand,
-                        arfcn = cellInfoData?.arfcn,
-                        earfcn = cellInfoData?.earfcn,
-                        uarfcn = cellInfoData?.uarfcn,
-                        nrarfcn = cellInfoData?.nrarfcn,
-                        frequencyHz = cellInfoData?.frequencyHz,
+                            frequency_band = cellInfoData?.frequencyBand,
+                            arfcn = cellInfoData?.arfcn,
+                            earfcn = cellInfoData?.earfcn,
+                            uarfcn = cellInfoData?.uarfcn,
+                            nrarfcn = cellInfoData?.nrarfcn,
+                            frequencyHz = cellInfoData?.frequencyHz,
 
-                        rsrp = cellInfoData?.rsrp,
-                        rsrq = cellInfoData?.rsrq,
-                        rscp = cellInfoData?.rscp,
-                        ecNo = cellInfoData?.rscp,
-                        rxLev = cellInfoData?.rxLev,
+                            rsrp = cellInfoData?.rsrp,
+                            rsrq = cellInfoData?.rsrq,
+                            rscp = cellInfoData?.rscp,
+                            ecNo = cellInfoData?.rscp,
+                            rxLev = cellInfoData?.rxLev,
 
-                        download_rate = dataMap["downloadRateKbps"] as? Double,
-                        upload_rate = dataMap["uploadRateKbps"] as? Double,
-                        dns_response_time = dataMap["dnsLookupTimeMs"] as? Double,
-                        ping_response_time = dataMap["pingResultMs"] as? Double,
-                        sms_delivery_time = smsDeliveryTime, // Converted to Double?
-                        longitude = locationData?.longitude,
-                        latitude = locationData?.latitude
-                    )
+                            download_rate = dataMap["downloadRateKbps"] as? Double,
+                            upload_rate = dataMap["uploadRateKbps"] as? Double,
+                            dns_response_time = dataMap["dnsLookupTimeMs"] as? Double,
+                            ping_response_time = dataMap["pingResultMs"] as? Double,
+                            sms_delivery_time = smsDeliveryTime, // Converted to Double?
+                            longitude = locationData.longitude,
+                            latitude = locationData.latitude
+                        )
+                    }
                 } catch (e: Exception) {
                     Log.e("ForegroundService", "Error converting data entry to Signal object: ${e.message}", e)
                     null // Skip this entry if conversion fails
