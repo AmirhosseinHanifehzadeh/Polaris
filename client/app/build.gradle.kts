@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.parvin_project" // <--- ENSURE THIS MATCHES YOUR PROJECT'S PACKAGE NAME
+    namespace = "com.example.porteghal" // <--- ENSURE THIS MATCHES YOUR PROJECT'S PACKAGE NAME
     compileSdk = 34 // Or your current compile SDK version
 
     defaultConfig {
-        applicationId = "com.example.parvin_project" // <--- ENSURE THIS MATCHES YOUR PROJECT'S PACKAGE NAME
+        applicationId = "com.example.porteghal" // <--- ENSURE THIS MATCHES YOUR PROJECT'S PACKAGE NAME
         minSdk = 28 // Minimum SDK version required for TelephonyManager.getAllCellInfo() and CellInfoNr
         targetSdk = 34 // Or your current target SDK version
         versionCode = 1
